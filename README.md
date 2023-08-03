@@ -18,7 +18,7 @@ cd seg
 python segment/train.py --batch-size 8 \
  --img-size 640 \
  --epochs 10 \
- --data data/horoscope.yml \
+ --data data/${data}.yml \
  --weights data/weights/yolov7-seg.pt \
  --device 0 \
  --name model
@@ -30,8 +30,8 @@ cd seg
 python segment/predict.py \
 --weights runs/train-seg/model/weights/best.pt \
 --conf 0.25 \
---data data/horoscope.yml \
---source ../datasets/horoscope/test \
+--data data/${data}.yml \
+--source ../datasets/${name}/test \
 --name evaluate_model
 ```
 

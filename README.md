@@ -14,7 +14,7 @@ This implimentation is based on [yolov5](https://github.com/ultralytics/yolov5).
 
 Train:
 ```
-cd seg
+! cd seg
 python segment/train.py --batch-size 8 \
  --img-size 640 \
  --epochs 10 \
@@ -26,7 +26,7 @@ python segment/train.py --batch-size 8 \
 
 Detect:
 ```
-cd seg
+! cd seg
 python segment/predict.py \
 --weights runs/train-seg/model/weights/best.pt \
 --conf 0.25 \

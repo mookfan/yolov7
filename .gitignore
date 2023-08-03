@@ -4,6 +4,8 @@
 *.JPG
 *.jpg
 *.txt
+*.cache
+/seg/runs/**
 
 !seg/**/
 !dataset/**/

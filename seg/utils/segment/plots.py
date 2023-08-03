@@ -70,7 +70,7 @@ def plot_images_and_masks(images, targets, masks, paths=None, fname='images.jpg'
         images *= 255  # de-normalise (optional)
 
     # Build Image
-    mosaic = np.full((int(ns * h), int(ns * w), 3), 255, dtype=np.uint8)  # init
+    mosaic = np.full((int(ns * h), int(ns * w), 3), 255, dtype='uint8')  # init
     for i, im in enumerate(images):
         if i == max_subplots:  # if last batch has fewer images than we expect
             break
@@ -135,11 +135,11 @@ def plot_images_and_masks(images, targets, masks, paths=None, fname='images.jpg'
                         color = colors(classes[j])
                         mh, mw = image_masks[j].shape
                         if mh != h or mw != w:
-                            mask = image_masks[j].astype(np.uint8)
+                            mask = image_masks[j].astype('uint8')
                             mask = cv2.resize(mask, (w, h))
-                            mask = mask.astype(np.bool)
+                            mask = mask.astype(bool)
                         else:
-                            mask = image_masks[j].astype(np.bool)
+                            mask = image_masks[j].astype(bool)
                         with contextlib.suppress(Exception):
                             im[y:y + h, x:x + w, :][mask] = im[y:y + h, x:x + w, :][mask] * 0.4 + np.array(color) * 0.6
                 annotator.fromarray(im)

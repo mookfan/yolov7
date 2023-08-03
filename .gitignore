@@ -1,0 +1,9 @@
+*.pyc
+*.pt
+*.png
+*.JPG
+*.jpg
+*.txt
+
+!seg/**/
+!dataset/**/

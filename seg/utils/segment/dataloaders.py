@@ -280,7 +280,7 @@ def polygon2mask(img_size, polygons, color=1, downsample_ratio=1):
     """
     mask = np.zeros(img_size, dtype=np.uint8)
     polygons = np.asarray(polygons)
-    polygons = polygons.astype(np.int32)
+    polygons = polygons.astype('int32')
     shape = polygons.shape
     polygons = polygons.reshape(shape[0], -1, 2)
     cv2.fillPoly(mask, polygons, color=color)
@@ -309,7 +309,7 @@ def polygons2masks(img_size, polygons, color, downsample_ratio=1):
 def polygons2masks_overlap(img_size, segments, downsample_ratio=1):
     """Return a (640, 640) overlap mask."""
     masks = np.zeros((img_size[0] // downsample_ratio, img_size[1] // downsample_ratio),
-            dtype=np.int32 if len(segments) > 255 else np.uint8)
+            dtype='int32' if len(segments) > 255 else np.uint8)
     areas = []
     ms = []
     for si in range(len(segments)):

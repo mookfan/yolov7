@@ -9,3 +9,5 @@
 
 !seg/**/
 !dataset/**/
+seg/mlruns/**
+/**/.env

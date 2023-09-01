@@ -1,0 +1,48 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "name": "Python: train model",
+            "type": "python",
+            "request": "launch",
+            "program": "seg/segment/train_mlflow.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--batch-size", "8",
+                "--img-size", "640",
+                "--epochs", "1",
+                "--data", "/home/mook/ws/yolov7-horoscope/seg/data/horoscope.yml",
+                "--weights", "/home/mook/ws/yolov7-horoscope/seg/data/weights/yolov7-seg.pt",
+                "--device", "0",
+                "--name", "model_mlflow_test",
+                "--artifact_name", "artifact"
+            ]
+        },
+        {
+            "name": "Python: predict model",
+            "type": "python",
+            "request": "launch",
+            "program": "seg/segment/predict.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--weights", "/home/mook/ws/yolov7-horoscope/seg/runs/train-seg/model_2023-08-08/weights/best.pt",
+                "--conf", "0.25",
+                "--data", "/home/mook/ws/yolov7-horoscope/seg/data/horoscope.yml",
+                "--source", "/home/mook/ws/yolov7-horoscope/datasets/horoscope/test",
+                "--name", "model_mlflow_test_prediction",
+                "--save-txt"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+        }
+    ]
+}

@@ -391,17 +391,24 @@ class DetectMultiBackend(nn.Module):
         #   TensorFlow GraphDef:            *.pb
         #   TensorFlow Lite:                *.tflite
         #   TensorFlow Edge TPU:            *_edgetpu.tflite
-        from models.experimental import attempt_download, attempt_load  # scoped to avoid circular import
+        #   Mlflow:                         *.pt
+        from models.experimental import attempt_download, attempt_load, mlflow_download  # scoped to avoid circular import
 
         super().__init__()
         w = str(weights[0] if isinstance(weights, list) else weights)
-        pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs = self._model_type(w)  # get backend
-        w = attempt_download(w)  # download if not local
+        is_mlflow = True if 'runs:/' in w else False
+        if is_mlflow:
+            weight_suffix = '.pt'  # add .pt if weight is from mlflow 
+            pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs = self._model_type(weight_suffix)  # get backend
+            w = mlflow_download(w)
+        else:
+            pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs = self._model_type(w)  # get backend
+            w = attempt_download(w)  # download if not local
         fp16 &= pt or jit or onnx or engine  # FP16
         stride = 32  # default stride
 
         if pt:  # PyTorch
-            model = attempt_load(weights if isinstance(weights, list) else w, device=device, inplace=True, fuse=fuse)
+            model = attempt_load(weights if isinstance(weights, list) else w, device=device, inplace=True, fuse=fuse, is_mlflow=is_mlflow)
             stride = max(int(model.stride.max()), 32)  # model stride
             names = model.module.names if hasattr(model, 'module') else model.names  # get class names
             model.half() if fp16 else model.float()

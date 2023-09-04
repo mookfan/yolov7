@@ -2,13 +2,30 @@
 """
 Experimental modules
 """
+from dotenv import load_dotenv
 import math
 
+import mlflow
 import numpy as np
+import os
+from pathlib import Path
+import sys
 import torch
 import torch.nn as nn
 
 from utils.downloads import attempt_download
+
+# to be import models.yolo inside mlflow.pytorch.load_model function
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[1]  # YOLOv5 root directory
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))  # add ROOT to PATH
+
+load_dotenv(dotenv_path=Path(ROOT, 'segment/.env'))
+
+os.environ["AWS_ACCESS_KEY_ID"] = os.getenv('AWS_ACCESS_KEY_ID')
+os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv('AWS_SECRET_ACCESS_KEY')
+os.environ["MLFLOW_TRACKING_URI"] = os.getenv('MLFLOW_TRACKING_URI')
 
 
 class Sum(nn.Module):
@@ -70,14 +87,18 @@ class Ensemble(nn.ModuleList):
         return y, None  # inference, train output
 
 
-def attempt_load(weights, device=None, inplace=True, fuse=True):
+def attempt_load(weights, device=None, inplace=True, fuse=True, is_mlflow=False):
     # Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a
     from models.yolo import Detect, Model
 
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
-        ckpt = torch.load(attempt_download(w), map_location='cpu')  # load
-        ckpt = (ckpt.get('ema') or ckpt['model']).to(device).float()  # FP32 model
+        if is_mlflow:
+            ckpt = mlflow_download(w)
+            ckpt = ckpt.to(device).float()  # FP32 model
+        else:
+            ckpt = torch.load(attempt_download(w), map_location='cpu')  # load
+            ckpt = (ckpt.get('ema') or ckpt['model']).to(device).float()  # FP32 model
 
         # Model compatibility updates
         if not hasattr(ckpt, 'stride'):
@@ -108,4 +129,9 @@ def attempt_load(weights, device=None, inplace=True, fuse=True):
         setattr(model, k, getattr(model[0], k))
     model.stride = model[torch.argmax(torch.tensor([m.stride.max() for m in model])).int()].stride  # max stride
     assert all(model[0].nc == m.nc for m in model), f'Models have different class counts: {[m.nc for m in model]}'
+    return model
+
+
+def mlflow_download(model_url):
+    model = mlflow.pytorch.load_model(model_url)
     return model

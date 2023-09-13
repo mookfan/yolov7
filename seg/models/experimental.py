@@ -94,7 +94,10 @@ def attempt_load(weights, device=None, inplace=True, fuse=True, is_mlflow=False)
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
         if is_mlflow:
-            ckpt = mlflow_download(w)
+            if isinstance(w, str):
+                ckpt = mlflow_download(w)
+            else:
+                ckpt = w
             ckpt = ckpt.to(device).float()  # FP32 model
         else:
             ckpt = torch.load(attempt_download(w), map_location='cpu')  # load
@@ -132,6 +135,6 @@ def attempt_load(weights, device=None, inplace=True, fuse=True, is_mlflow=False)
     return model
 
 
-def mlflow_download(model_url):
-    model = mlflow.pytorch.load_model(model_url)
+def mlflow_download(model_url, device):
+    model = mlflow.pytorch.load_model(model_url, map_location=device)
     return model

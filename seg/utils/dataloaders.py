@@ -270,6 +270,50 @@ class LoadImages:
         return self.nf  # number of files
 
 
+class LoadImagesPIL:
+    from PIL.Image import Image
+
+    def __init__(self, image, img_size=640, stride=32, auto=True, transforms=None):
+        if isinstance(image, Image.Image) or isinstance(image, np.ndarray):
+            self.images = [np.array(image)]
+        ni = len(self.images)
+        self.img_size = img_size
+        self.stride = stride
+        self.nf = ni  # number of files *image only
+        self.video_flag = False
+        self.mode = 'image'
+        self.auto = auto
+        self.transforms = transforms  # optional
+        self.cap = None
+        assert self.nf > 0, 'No images found in class LoadImagesPIL. ' \
+                            'Supported formats are:\nimages: PIL.Image.Image'
+
+    def __iter__(self):
+        self.count = 0
+        return self
+
+    def __next__(self):
+        if self.count == self.nf:
+            raise StopIteration
+        im0 = self.images[self.count]
+        im0 = cv2.cvtColor(im0, cv2.COLOR_RGB2BGR)  # bc we read with PIL
+        self.count += 1
+        assert im0 is not None, 'Image is None'
+        s = f'image {self.count}/{self.nf} {im0.shape}: '
+        if self.transforms:
+            im = self.transforms(cv2.cvtColor(im0, cv2.COLOR_BGR2RGB))  # transforms
+        else:
+            # padded resize
+            im = letterbox(im0, self.img_size, stride=self.stride, auto=self.auto)[0]
+            im = im.transpose((2, 0, 1))[::-1]  # HWC to CHW, BGR to RGB
+            im = np.ascontiguousarray(im)  # contiguous
+        return None, im, im0, self.cap, s
+
+    def __len__(self):
+        return self.nf  # number of files
+
+
+
 class LoadWebcam:  # for inference
     # YOLOv5 local webcam dataloader, i.e. `python detect.py --source 0`
     def __init__(self, pipe='0', img_size=640, stride=32):

@@ -398,9 +398,9 @@ class DetectMultiBackend(nn.Module):
         w = str(weights[0] if isinstance(weights, list) else weights)
         is_mlflow = True if 'runs:/' in w else False
         if is_mlflow:
-            weight_suffix = '.pt'  # add .pt if weight is from mlflow 
+            weight_suffix = '.pt'  # add .pt if weight is from mlflow
             pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs = self._model_type(weight_suffix)  # get backend
-            w = mlflow_download(w)
+            w = mlflow_download(model_url=w, device=device)
         else:
             pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs = self._model_type(w)  # get backend
             w = attempt_download(w)  # download if not local
